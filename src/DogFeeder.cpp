@@ -10,6 +10,8 @@
 #include <aREST.h>
 #include "WifiConfig.h"
 
+#define LIGHTPIN 2
+
 // Create aREST instance
 aREST rest = aREST();
 
@@ -31,11 +33,15 @@ int setFeedCups(String command);
 int isFeeding(String command);
 int ledControl(String command);
 
+void connectWifi();
+void wifiConnectPending();
+
 void setup()
 {
   
   // Start Serial
   Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // Init variables and expose them to REST API
   breakfastTime = -1;
@@ -60,20 +66,13 @@ void setup()
   rest.set_name("esp32");
 
   // Connect to WiFi
-  WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.println("WiFi connected");
+  connectWifi();
 
   // Start the server
   server.begin();
   Serial.println("Server started");
 
-  // Print the IP address
-  Serial.println(WiFi.localIP());
+
 
 }
 
@@ -121,3 +120,37 @@ int ledControl(String command) {
     digitalWrite(6,state);
     return 1;
 }
+
+void wifiConnectPending()
+{
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(500);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(500);
+        //Serial.print(".");
+    }
+
+    //Blink LED when connected
+    for (int i = 0; i < 3; i++)
+    {
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(50);
+        digitalWrite(LED_BUILTIN, LOW);
+        delay(50);
+    }
+    // Print the IP address
+    Serial.print("WiFi connected: ");
+    Serial.println(WiFi.localIP());
+}
+
+void connectWifi()
+{
+    // Connect to WiFi
+    WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
+    wifiConnectPending();
+    //Serial.println("");
+    //Serial.println("WiFi connected");
+}
+
