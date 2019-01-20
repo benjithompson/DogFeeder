@@ -8,7 +8,6 @@
 // Import required libraries
 #include <WiFi.h>
 #include <aREST.h>
-#include "FeederAPI.h"
 #include "WifiConfig.h"
 
 // Create aREST instance
@@ -18,10 +17,18 @@ aREST rest = aREST();
 WiFiServer server(NETWORK_PORT);
 
 // Variables to be exposed to the API
-int temperature;
-int humidity;
+int breakfastTime;
+int dinnerTime;
+double feedCups;
+
 
 // Declare functions to be exposed to the API
+int startFeed(String command);
+int stopFeed(String command);
+int setBreakfastTime(String command);
+int setDinnerTime(String command);
+int setFeedCups(String command);
+int isFeeding(String command);
 int ledControl(String command);
 
 void setup()
@@ -31,16 +38,25 @@ void setup()
   Serial.begin(115200);
 
   // Init variables and expose them to REST API
-  temperature = 24;
-  humidity = 40;
-  rest.variable("temperature",&temperature);
-  rest.variable("humidity",&humidity);
+  breakfastTime = -1;
+  dinnerTime = -1;
+  feedCups = 1;
+  rest.variable("breakfastTime",&breakfastTime);
+  rest.variable("dinnerTime",&dinnerTime);
+  rest.variable("feedCups", &feedCups);
 
   // Function to be exposed
   rest.function("led",ledControl);
+  rest.function("startFeed", startFeed);
+  rest.function("stopFeed", stopFeed);
+  rest.function("setBreakfastTime", setBreakfastTime);
+  rest.function("setDinnerTime", setDinnerTime);
+  rest.function("setFeedCups", setFeedCups);
+  rest.function("isFeeding", isFeeding);
+  rest.function("ledControl", ledControl);
 
   // Give name & ID to the device (ID should be 6 characters long)
-  rest.set_id("1");
+  rest.set_id("000001");
   rest.set_name("esp32");
 
   // Connect to WiFi
@@ -75,11 +91,33 @@ void loop() {
 }
 
 // Custom function accessible by the API
+
+int startFeed(String command){
+    return 1;
+}
+int stopFeed(String command){
+    return 1;
+}
+int setBreakfastTime(String command){
+    return 1;
+}
+
+int setDinnerTime(String command){
+    return 1;
+}
+
+int setFeedCups(String command){
+    return 1;
+}
+
+int isFeeding(String command){
+    return 1;
+}
+
 int ledControl(String command) {
+    // Get state from command
+    int state = command.toInt();
 
-  // Get state from command
-  int state = command.toInt();
-
-  digitalWrite(6,state);
-  return 1;
+    digitalWrite(6,state);
+    return 1;
 }
