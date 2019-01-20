@@ -1,0 +1,15 @@
+Notes on ESP32 Kolban Book:
+
+Arduino IDE:            p418
+Programming with Python p432
+REST Services           p441
+Storage Programming     p485
+
+ArduinoIDE:
+
+
+
+REST Services:
+An excellent resource for testing Curl requests is the "httpbin.org" website.  This provides HTTP rest responses for a variety of tests.
+
+Mongoose Rest Server
