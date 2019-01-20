@@ -1,47 +1,85 @@
 /*
-  DogFeeder Client Project. Takes rest requests to change configuration for feed schedule and feed amount.
-  Motor control handles Stepper Motor functionality.
+  This a simple example of the aREST Library for the ESP32 WiFi chip.
+  See the README file for more details.
+  Written in 2017 by Marco Schwartz under a GPL license.
+  
 */
 
-
-#include <Arduino.h>
+// Import required libraries
 #include <WiFi.h>
-#include "wifiConfig.h"
-#include "FeederRestApi.h"
+#include <aREST.h>
+#include "FeederAPI.h"
+#include "WifiConfig.h"
 
+// Create aREST instance
+aREST rest = aREST();
 
-FeederRestApi feederapi = FeederRestApi();
-aREST rest = feederapi.getARestApi();
+// Create an instance of the server
+WiFiServer server(NETWORK_PORT);
 
-int status = WL_IDLE_STATUS;
-WiFiServer server(80);
+// Variables to be exposed to the API
+int temperature;
+int humidity;
 
-void setup() {
-    status = WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
-    if ( status != WL_CONNECTED) { 
-      Serial.println("Couldn't get a wifi connection");
-      while(true);
-    } 
-    else {
-      server.begin();
-      Serial.print("Connected to wifi. My address:");
-      IPAddress myAddress = WiFi.localIP();
-      Serial.println(myAddress);
-    }
+// Declare functions to be exposed to the API
+int ledControl(String command);
+
+void setup()
+{
+  
+  // Start Serial
+  Serial.begin(115200);
+
+  // Init variables and expose them to REST API
+  temperature = 24;
+  humidity = 40;
+  rest.variable("temperature",&temperature);
+  rest.variable("humidity",&humidity);
+
+  // Function to be exposed
+  rest.function("led",ledControl);
+
+  // Give name & ID to the device (ID should be 6 characters long)
+  rest.set_id("1");
+  rest.set_name("esp32");
+
+  // Connect to WiFi
+  WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("WiFi connected");
+
+  // Start the server
+  server.begin();
+  Serial.println("Server started");
+
+  // Print the IP address
+  Serial.println(WiFi.localIP());
+
 }
 
 void loop() {
-  // listen for incoming clients
+  
+  // Handle REST calls
   WiFiClient client = server.available();
-  if (client) {
-
-    if (client.connected()) {
-      Serial.println("Connected to client");
-    }
-
-    // close the connection:
-    client.stop();
-    rest.handle(client);
+  if (!client) {
+    return;
   }
+  while(!client.available()){
+    delay(1);
+  }
+  rest.handle(client);
+}
 
+// Custom function accessible by the API
+int ledControl(String command) {
+
+  // Get state from command
+  int state = command.toInt();
+
+  digitalWrite(6,state);
+  return 1;
 }
