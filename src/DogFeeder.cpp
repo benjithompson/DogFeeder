@@ -8,9 +8,13 @@
 // Import required libraries
 #include <WiFi.h>
 #include <aREST.h>
+#include <Preferences.h>
 #include "WifiConfig.h"
 
 #define LIGHTPIN 2
+
+// create an instance of Preferences library
+Preferences preferences;
 
 // Create aREST instance
 aREST rest = aREST();
@@ -22,7 +26,7 @@ WiFiServer server(NETWORK_PORT);
 int breakfastTime;
 int dinnerTime;
 double feedCups;
-
+int isFeeding;
 
 // Declare functions to be exposed to the API
 int startFeed(String command);
@@ -30,96 +34,151 @@ int stopFeed(String command);
 int setBreakfastTime(String command);
 int setDinnerTime(String command);
 int setFeedCups(String command);
-int isFeeding(String command);
 int ledControl(String command);
-
+int resetPreferences(String command);
+// Declare local functions
 void connectWifi();
 void wifiConnectPending();
+void printCurrentPrefs();
 
 void setup()
 {
-  
-  // Start Serial
-  Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
 
-  // Init variables and expose them to REST API
-  breakfastTime = -1;
-  dinnerTime = -1;
-  feedCups = 1;
-  rest.variable("breakfastTime",&breakfastTime);
-  rest.variable("dinnerTime",&dinnerTime);
-  rest.variable("feedCups", &feedCups);
+    // Start Serial
+    Serial.begin(115200);
+    pinMode(LED_BUILTIN, OUTPUT);
 
-  // Function to be exposed
-  rest.function("led",ledControl);
-  rest.function("startFeed", startFeed);
-  rest.function("stopFeed", stopFeed);
-  rest.function("setBreakfastTime", setBreakfastTime);
-  rest.function("setDinnerTime", setDinnerTime);
-  rest.function("setFeedCups", setFeedCups);
-  rest.function("isFeeding", isFeeding);
-  rest.function("ledControl", ledControl);
+    /* Start a namespace "feedpref"
+    in Read-Write mode: set second parameter to false 
+    Note: Namespace name is limited to 15 chars */
+    preferences.begin("feedpref", true);
 
-  // Give name & ID to the device (ID should be 6 characters long)
-  rest.set_id("000001");
-  rest.set_name("esp32");
+    // Init variables from stored Preferences key:value pairs and expose them to REST API. If none exist
+    // use the default value
+    breakfastTime = preferences.getInt("breakfastTime", -1);
+    dinnerTime = preferences.getInt("dinnerTime", -1);
+    feedCups = preferences.getDouble("feedCups", 0.0);
+    isFeeding = 0;
 
-  // Connect to WiFi
-  connectWifi();
+    printCurrentPrefs();
 
-  // Start the server
-  server.begin();
-  Serial.println("Server started");
+    rest.variable("breakfastTime", &breakfastTime);
+    rest.variable("dinnerTime", &dinnerTime);
+    rest.variable("feedCups", &feedCups);
+    rest.variable("isFeeding", &isFeeding);
 
+    // Function to be exposed
+    rest.function("led", ledControl);
+    rest.function("startFeed", startFeed);
+    rest.function("stopFeed", stopFeed);
+    rest.function("setBreakfastTime", setBreakfastTime);
+    rest.function("setDinnerTime", setDinnerTime);
+    rest.function("setFeedCups", setFeedCups);
+    rest.function("ledControl", ledControl);
+    rest.function("resetPreferences", resetPreferences);
 
+    // Give name & ID to the device (ID should be 6 characters long)
+    rest.set_id("000001");
+    rest.set_name("DogFeeder");
 
+    // Connect to WiFi
+    connectWifi();
+
+    // Start the server
+    server.begin();
+    Serial.println("Server started");
+
+    /* Close the Preferences */
+    preferences.end();
 }
 
-void loop() {
-  
-  // Handle REST calls
-  WiFiClient client = server.available();
-  if (!client) {
-    return;
-  }
-  while(!client.available()){
-    delay(1);
-  }
-  rest.handle(client);
+void loop()
+{
+
+    // Handle REST calls
+    WiFiClient client = server.available();
+    if (!client)
+    {
+        return;
+    }
+    while (!client.available())
+    {
+        delay(1);
+    }
+    rest.handle(client);
 }
 
 // Custom function accessible by the API
 
-int startFeed(String command){
+int startFeed(String command)
+{
+    //Start motor for the number of set cups
     return 1;
 }
-int stopFeed(String command){
+int stopFeed(String command)
+{
+    //Stop feeding by stopping motor
     return 1;
 }
-int setBreakfastTime(String command){
-    return 1;
+int setBreakfastTime(String command)
+{
+    int cmd = command.toInt();
+    Serial.printf("Current Breakfast Time: %d\n", breakfastTime);
+    preferences.begin("feedpref", false);
+    preferences.putInt("breakfastTime", cmd);
+    breakfastTime = preferences.getInt("breakfastTime", -1);
+    Serial.printf("New Breakfast Time: %d\n", breakfastTime);
+    preferences.end();
+    return breakfastTime;
 }
 
-int setDinnerTime(String command){
-    return 1;
+int setDinnerTime(String command)
+{
+    int cmd = command.toInt();
+    Serial.printf("Current dinner Time: %d\n", dinnerTime);
+    preferences.begin("feedpref", false);
+    preferences.putInt("dinnerTime", cmd);
+    dinnerTime = preferences.getInt("dinnerTime", -1);
+    Serial.printf("New dinner Time: %d\n", dinnerTime);
+    preferences.end();
+    return dinnerTime;
 }
 
-int setFeedCups(String command){
-    return 1;
+int setFeedCups(String command)
+{
+    double cmd = command.toDouble();
+    Serial.printf("Current Feed Cups: %.1f\n", feedCups);
+    preferences.begin("feedpref", false);
+    preferences.putDouble("feedCups", cmd);
+    feedCups = preferences.getDouble("feedCups", -1);
+    Serial.printf("New Feed Cups: %.1f\n", feedCups);
+    preferences.end();
+    return feedCups;
 }
 
-int isFeeding(String command){
-    return 1;
-}
-
-int ledControl(String command) {
+int ledControl(String command)
+{
     // Get state from command
     int state = command.toInt();
 
-    digitalWrite(6,state);
+    digitalWrite(6, state);
     return 1;
 }
+
+int resetPreferences(String command)
+{
+    Serial.println("Reset Preferences");
+    preferences.begin("feedpref", false);
+    preferences.clear();
+    breakfastTime = preferences.getInt("breakfastTime", -1);
+    dinnerTime = preferences.getInt("dinnerTime", -1);
+    feedCups = preferences.getDouble("feedCups", 0.0);
+    preferences.end();
+
+    return 1;
+}
+
+//Local private functions
 
 void wifiConnectPending()
 {
@@ -149,8 +208,13 @@ void connectWifi()
 {
     // Connect to WiFi
     WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
+    Serial.println("Connecting to Wifi...");
     wifiConnectPending();
-    //Serial.println("");
-    //Serial.println("WiFi connected");
 }
 
+void printCurrentPrefs()
+{
+    printf("breakfastTime: %d\n", breakfastTime);
+    printf("dinnerTime: %d\n", dinnerTime);
+    printf("feedCups: %.1f\n", feedCups);
+}
