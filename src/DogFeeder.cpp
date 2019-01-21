@@ -31,18 +31,21 @@ void setup()
     pullPreferences();
     printPrefs();
 
+    // Variables to be exposed
     rest.variable("breakfastTime", &breakfastTime);
     rest.variable("dinnerTime", &dinnerTime);
     rest.variable("feedCups", &feedCups);
     rest.variable("isFeeding", &isFeeding);
 
-    // Function to be exposed
+    // Functions to be exposed
     rest.function("led", ledControl);
     rest.function("stopFeed", stopFeed);
     rest.function("startFeed", startFeed);
+
     rest.function("setFeedCups", setFeedCups);
     rest.function("setDinnerTime", setDinnerTime);
     rest.function("setBreakfastTime", setBreakfastTime);
+
     rest.function("resetPreferences", resetPreferences);
     rest.function("restartFeeder", restartFeeder);
 
