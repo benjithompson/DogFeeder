@@ -66,7 +66,13 @@ void loop()
 
     // Handle REST calls
     WiFiClient client = server.available();
-    if (!client)
+
+    if(restartRequested==1){
+        Serial.println("restartComplete");
+        client.println("HTTP/1.1 200 OK");
+        setRestartRequested(0);
+    }
+    if (client)
     {
         return;
     }

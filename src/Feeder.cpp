@@ -1,5 +1,6 @@
 #include "Feeder.h"
 
+
 int isFeeding;
 
 int getIsFeeding(){
@@ -26,5 +27,7 @@ int ledControl(String command)
 }
 
 int restartFeeder(String command){
+    setRestartRequested(1);
     ESP.restart();
+    return 1;
 }

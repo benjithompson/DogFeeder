@@ -4,6 +4,7 @@
   int breakfastTime;
   int dinnerTime;
   double feedCups;
+  int restartRequested;
 
 void pullPreferences()
 {
@@ -11,6 +12,7 @@ void pullPreferences()
     breakfastTime = prefs.getInt("breakfastTime", -1);
     dinnerTime = prefs.getInt("dinnerTime", -1);
     feedCups = prefs.getDouble("feedCups", 0.0);
+    restartRequested = prefs.getInt("restartReq", 0);
     prefs.end();
 }
 
@@ -50,6 +52,16 @@ int setFeedCups(String command)
     return feedCups * 10;
 }
 
+void setRestartRequested(int restartState)
+{
+    Serial.printf("Current restartRequested: %d\n", restartRequested);
+    prefs.begin("feedprefs", false);
+    prefs.putInt("restartReq", restartState);
+    restartRequested = prefs.getInt("restartReq", 0);
+    Serial.printf("New restartRequested: %d\n", restartRequested);
+    prefs.end();
+}
+
 int resetPreferences(String command)
 {
     Serial.println("Reset Preferences");
@@ -58,6 +70,7 @@ int resetPreferences(String command)
     breakfastTime = prefs.getInt("breakfastTime", -1);
     dinnerTime = prefs.getInt("dinnerTime", -1);
     feedCups = prefs.getDouble("feedCups", 0.0);
+    restartRequested = prefs.getInt("restartReq", 0);
     prefs.end();
 
     return 1;
@@ -68,4 +81,5 @@ void printPrefs()
     printf("breakfastTime: %d\n", breakfastTime);
     printf("dinnerTime: %d\n", dinnerTime);
     printf("feedCups: %.1f\n", feedCups);
+    printf("restartRequested: %d\n", restartRequested);
 }

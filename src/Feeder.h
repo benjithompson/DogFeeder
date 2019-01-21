@@ -1,6 +1,7 @@
 #ifndef FEEDER_H
 #define FEEDER_H
 #include <CheapStepper.h>
+#include "FeederPrefs.h"
 
 extern int isFeeding;
 
