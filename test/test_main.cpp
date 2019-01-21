@@ -2,8 +2,10 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <aREST.h>
-#include <Preferences.h>
+#include "FeederPrefs.h"
+#include "Feeder.h"
 #include "WifiConfig.h"
+#include <unity.h>
 
 Preferences preferences;
 
