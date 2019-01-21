@@ -7,15 +7,14 @@
   extern int dinnerTime;
   extern double feedCups;
 
+  void pullPreferences();
   int getBreakfastTime();
   int getDinnerTime();
   double getFeedCup();
   int setBreakfastTime(String command);
   int setDinnerTime(String command);
   int setFeedCups(String command);
-
   int resetPreferences(String command);
-  
   void printPrefs(void);
 
 #endif

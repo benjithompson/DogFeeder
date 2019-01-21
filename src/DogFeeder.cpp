@@ -25,16 +25,10 @@ void wifiConnectPending();
 void setup()
 {
 
-    // Start Serial
     Serial.begin(115200);
     pinMode(LED_BUILTIN, OUTPUT);
 
-    
-    //FeederPrefs fp("feeder_prefs");
-    breakfastTime = prefs.getInt("breakfastTime", -1);
-    dinnerTime = prefs.getInt("dinnerTime", -1);
-    feedCups = prefs.getDouble("feedCups", 0.0);
-
+    pullPreferences();
     printPrefs();
 
     rest.variable("breakfastTime", &breakfastTime);
@@ -62,9 +56,6 @@ void setup()
     // Start the server
     server.begin();
     Serial.println("Server started");
-
-    /* Close the Preferences */
-    prefs.end();
 }
 
 void loop()
