@@ -50,6 +50,7 @@ void setup()
     rest.function("setDinnerTime", setDinnerTime);
     rest.function("setBreakfastTime", setBreakfastTime);
     rest.function("resetPreferences", resetPreferences);
+    rest.function("restartFeeder", restartFeeder);
 
     // Give name & ID to the device (ID should be 6 characters long)
     rest.set_id("000001");

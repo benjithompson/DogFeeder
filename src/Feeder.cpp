@@ -24,3 +24,7 @@ int ledControl(String command)
     digitalWrite(6, state);
     return 1;
 }
+
+int restartFeeder(String command){
+    ESP.restart();
+}
