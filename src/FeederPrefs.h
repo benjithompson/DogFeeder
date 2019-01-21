@@ -6,6 +6,7 @@
   extern int breakfastTime;
   extern int dinnerTime;
   extern double feedCups;
+  extern int feedRPM;
   extern int restartRequested;
 
   void pullPreferences();
@@ -16,6 +17,8 @@
   int setDinnerTime(String command);
   int setFeedCups(String command);
   int resetPreferences(String command);
+  
+  void setFeedRPMPref(int rpm);
   void setRestartRequested(int restartState);
   void printPrefs(void);
 

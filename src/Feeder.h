@@ -3,12 +3,16 @@
 #include <CheapStepper.h>
 #include "FeederPrefs.h"
 
-extern int isFeeding;
 
+CheapStepper getStepper();
+int getIsFeeding(String command);
+int setIsFeeding(int status);
 int startFeed(String command);
 int stopFeed(String command);
+int setFeedRPM(String command);
 int ledControl(String command);
 int restartFeeder(String command);
+int cupsToDegrees(double cups);
 
 #endif
 
