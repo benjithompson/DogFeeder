@@ -1,5 +1,7 @@
 #include "Feeder.h"
 
+#define VOLUMNCONSTANT 900
+
 CheapStepper stepper(14,27,26,25);
 int isFeeding = 0;
 
@@ -11,29 +13,33 @@ int getIsFeeding(String command){
     return isFeeding;
 }
 
-int setIsFeeding(int status){
-    isFeeding = status;
+//starts stepper move with integer cups.
+int startFeedCups(String command)
+{
+    int cups = command.toInt();
+    int degrees = cupsToDegrees(cups);
+    String sDegrees = String(degrees);
+    startFeedDegrees(sDegrees);
+    return cups;
 }
 
-int startFeed(String command)
+//starts stepper move with integer degrees.
+int startFeedDegrees(String command)
 {
     int degrees = command.toInt();
 
-    if(degrees == 0){
-        degrees = cupsToDegrees(feedCups);
+    if(degrees >= 0){
+        Serial.printf("moveDegreesCW: %d\n", degrees);
+        stepper.moveDegreesCW(degrees);
+    }else{
+        Serial.printf("moveDegreesCCW: %d\n", -degrees);
+        stepper.moveDegreesCCW(-degrees);
     }
-    Serial.printf("degrees: %d\n", degrees);
-    setIsFeeding(1);
-    Serial.printf("startFeeding: %d\n", isFeeding);
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(50);
-    //convert feedcups to degrees
-    stepper.moveDegreesCW(degrees);
 
+    setIsFeeding(1);
     return degrees;
 }
+
 int stopFeed(String command)
 {
     stepper.stop();
@@ -64,10 +70,19 @@ int restartFeeder(String command){
 
 int cupsToDegrees(double cups){
     //cups to degrees function
-    int degrees = (int)cups;
-    return degrees;
+    return (int)(cups*VOLUMNCONSTANT);
 }
 
 int setStepperRPM(int rpm){
     getStepper().setRpm(rpm);
+}
+
+int setIsFeeding(int status){
+    Serial.printf("startFeeding: %d\n", isFeeding);
+    isFeeding = status;
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(50);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(50);
+    return isFeeding;
 }

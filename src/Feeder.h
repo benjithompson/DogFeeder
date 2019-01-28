@@ -7,7 +7,8 @@
 CheapStepper getStepper();
 int getIsFeeding(String command);
 int setIsFeeding(int status);
-int startFeed(String command);
+int startFeedCups(String command);
+int startFeedDegrees(String command);
 int stopFeed(String command);
 int setFeedRPM(String command);
 int ledControl(String command);

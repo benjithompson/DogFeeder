@@ -44,7 +44,8 @@ void setup()
     // Functions to be exposed
     rest.function("led", ledControl);
     rest.function("stopFeed", stopFeed);
-    rest.function("startFeed", startFeed);
+    rest.function("startFeedCups", startFeedCups);
+    rest.function("startFeedDegrees", startFeedDegrees);
     rest.function("setFeedRPM", setFeedRPM);
 
     rest.function("setFeedCups", setFeedCups);
